@@ -885,7 +885,11 @@ impl hash::Hash for SmallBitVec {
         let len = self.len();
         len.hash(state);
         if self.is_inline() {
-            (self.data & inline_ones(len)).reverse_bits().hash(state);
+            // Hash nothing more for an empty vector, like the heap case
+            // below, so that equal vectors hash the same.
+            if len != 0 {
+                (self.data & inline_ones(len)).reverse_bits().hash(state);
+            }
         } else {
             let full_blocks = len / bits_per_storage();
             let remainder = len % bits_per_storage();

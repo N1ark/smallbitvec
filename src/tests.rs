@@ -395,3 +395,28 @@ fn hash() {
     assert_eq!(v3, v4);
     assert_eq!(hash(&v3), hash(&v4));
 }
+
+#[test]
+fn hash_empty() {
+    extern crate std;
+    use core::hash::{Hash, Hasher};
+
+    let hash = |v: &SmallBitVec| {
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        v.hash(&mut hasher);
+        hasher.finish()
+    };
+
+    let v1 = SmallBitVec::new();
+    let v2 = SmallBitVec::with_capacity(100);
+    assert!(v1.is_inline());
+    assert!(v2.is_heap());
+    assert_eq!(v1, v2);
+    assert_eq!(hash(&v1), hash(&v2));
+
+    let mut v3 = SmallBitVec::from_elem(100, true);
+    v3.clear();
+    assert!(v3.is_heap());
+    assert_eq!(v1, v3);
+    assert_eq!(hash(&v1), hash(&v3));
+}
